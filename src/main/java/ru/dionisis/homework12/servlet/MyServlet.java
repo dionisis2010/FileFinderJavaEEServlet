@@ -24,9 +24,12 @@ public class MyServlet extends HttpServlet {
     @Override
     @ParameterNames("depth")
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
+
+        String param = req.getParameter("depth");
+        int depth = param != null ? Integer.parseInt(param) : 0;
+
         resp.setStatus(200);
-        int depth = Integer.parseInt(req.getParameter("depth"));
-        try (PrintWriter writer = resp.getWriter()){
+        try (PrintWriter writer = resp.getWriter()) {
             fileFinder.getFileTree(depth).forEach(writer::write);
         } catch (IOException e) {
             e.printStackTrace();
