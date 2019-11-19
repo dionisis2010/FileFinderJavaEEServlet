@@ -1,9 +1,9 @@
 package ru.dionisis.homework12.servlet;
 
-import ru.dionisis.homework12.beans.MyBean;
+import com.sun.org.glassfish.gmbal.ParameterNames;
+import ru.dionisis.homework12.beans.FileFinder;
 
 import javax.ejb.EJB;
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -13,18 +13,23 @@ import java.io.PrintWriter;
 
 /**
  * сервлет, который выводит на любой гет запрос возвращает дерево фалов из проекта
+ * параметром depth можно указать глубину посика по вложенным каталогам
  */
 @WebServlet("/servlet")
 public class MyServlet extends HttpServlet {
 
     @EJB
-    MyBean myBean;
+    FileFinder fileFinder;
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    @ParameterNames("depth")
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         resp.setStatus(200);
-        PrintWriter writer = resp.getWriter();
-        myBean.getFiles().forEach(writer::println);
-        writer.close();
+        int depth = Integer.parseInt(req.getParameter("depth"));
+        try (PrintWriter writer = resp.getWriter()){
+            fileFinder.getFileTree(depth).forEach(writer::write);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
