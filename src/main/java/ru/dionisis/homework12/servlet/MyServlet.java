@@ -1,7 +1,10 @@
 package ru.dionisis.homework12.servlet;
 
 import com.sun.org.glassfish.gmbal.ParameterNames;
-import ru.dionisis.homework12.beans.FileFinder;
+import ru.dionisis.homework12.filefinder.FileFinder;
+import ru.dionisis.homework12.filefinder.ListFiles;
+import ru.dionisis.homework12.fileformat.FileFormat;
+import ru.dionisis.homework12.fileformat.FileStringFormat;
 
 import javax.ejb.EJB;
 import javax.servlet.annotation.WebServlet;
@@ -19,20 +22,26 @@ import java.io.PrintWriter;
 public class MyServlet extends HttpServlet {
 
     @EJB
-    FileFinder fileFinder;
+    ListFiles fileFinder;
 
     @Override
-    @ParameterNames("depth")
+    @ParameterNames({"depth", "format"})
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
 
         String param = req.getParameter("depth");
         int depth = param != null ? Integer.parseInt(param) : 0;
 
+        FileFormat fileNameFormat = FileStringFormat.get(req.getParameter("format"));
+
         resp.setStatus(200);
+        resp.setContentType("text/html; charset=UTF-8");
         try (PrintWriter writer = resp.getWriter()) {
-            fileFinder.getFileTree(depth).forEach(writer::write);
+                fileFinder.getFiles(FileFinder.HOME_DIR, depth, fileNameFormat).forEach(writer::println);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+
+
 }
